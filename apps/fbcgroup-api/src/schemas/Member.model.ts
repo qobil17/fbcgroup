@@ -29,7 +29,6 @@ const MemberSchema = new Schema(
 
 		memberNick: {
 			type: String,
-			index: { unique: true, sparse: true },
 			required: true,
 		},
 
@@ -37,10 +36,6 @@ const MemberSchema = new Schema(
 			type: String,
 			selected: false,
 			required: true,
-		},
-
-		memberFullName: {
-			type: String,
 		},
 
 		memberImage: {

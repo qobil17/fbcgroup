@@ -3,42 +3,35 @@ import { MemberType } from '../libs/enums/member.enum';
 import { typeFromAST } from 'graphql';
 import { ProductType, ServiceArea, ServiceCollection, ServiceType } from '../libs/enums/service.enum';
 
-const ServiceSchema = new Schema(
+const ProductSchema = new Schema(
 	{
-		serviceCollection: {
+		productType: {
 			type: String,
-			enum: ServiceCollection,
+			enum: ProductType,
 			required: true,
 		},
 
-		serviceType: {
+		productName: {
 			type: String,
-			enum: ServiceType,
 			required: true,
 		},
 
-		serviceArea: {
-			type: String,
-			enum: ServiceArea,
-			required: true,
-		},
-
-		servicePrice: {
+		productPrice: {
 			type: Number,
 			required: true,
 			min: 0,
 		},
 
-		serviceDesc: {
+		productDesc: {
 			type: String,
 		},
 
-		serviceImages: {
+		productImages: {
 			type: [String],
 			default: [],
 		},
 
-		serviceViews: {
+		productViews: {
 			type: Number,
 			default: 0,
 			min: 0,
@@ -46,4 +39,4 @@ const ServiceSchema = new Schema(
 	},
 	{ timestamps: true, collection: 'services' },
 );
-export default ServiceSchema;
+export default ProductSchema;
