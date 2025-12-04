@@ -1,7 +1,5 @@
 import { Schema } from 'mongoose';
-import { MemberType } from '../libs/enums/member.enum';
-import { typeFromAST } from 'graphql';
-import { ProductType, ServiceArea, ServiceCollection, ServiceType } from '../libs/enums/service.enum';
+import { ProductType } from '../libs/enums/service.enum';
 
 const ProductSchema = new Schema(
 	{
@@ -37,6 +35,6 @@ const ProductSchema = new Schema(
 			min: 0,
 		},
 	},
-	{ timestamps: true, collection: 'services' },
+	{ timestamps: true, collection: 'products' },
 );
 export default ProductSchema;

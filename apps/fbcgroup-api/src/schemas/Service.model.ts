@@ -1,7 +1,5 @@
 import { Schema } from 'mongoose';
-import { MemberType } from '../libs/enums/member.enum';
-import { typeFromAST } from 'graphql';
-import { ProductType, ServiceArea, ServiceCollection, ServiceType } from '../libs/enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceType } from '../libs/enums/service.enum';
 
 const ServiceSchema = new Schema(
 	{
