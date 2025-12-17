@@ -9,9 +9,9 @@ export class MemberInput {
 	@Field(() => String)
 	memberNick: string;
 
-	@IsNotEmpty()
+	@IsOptional()
 	@Length(5, 12)
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	memberPassword: string;
 
 	@IsNotEmpty()
