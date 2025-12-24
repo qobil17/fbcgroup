@@ -85,8 +85,6 @@ export class MemberResolver {
 		return await this.memberService.updateMemberByAdmin(input);
 	}
 
-	/** UPLOADER **/
-
 	@UseGuards(AuthGuard)
 	@Mutation((returns) => String)
 	public async imageUploader(
@@ -116,19 +114,18 @@ export class MemberResolver {
 	}
 
 	@UseGuards(AuthGuard)
-	@Mutation(() => [String])
+	@Mutation((returns) => [String])
 	public async imagesUploader(
 		@Args('files', { type: () => [GraphQLUpload] })
 		files: Promise<FileUpload>[],
-		@Args('target') target: string,
+		@Args('target') target: String,
 	): Promise<string[]> {
 		console.log('Mutation: imagesUploader');
 
-		const uploadedImages: string[] = [];
-
-		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<void> => {
+		const uploadedImages = [];
+		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<Promise<void>> => {
 			try {
-				const { filename, mimetype, createReadStream } = await img;
+				const { filename, mimetype, encoding, createReadStream } = await img;
 
 				const validMime = validMimeTypes.includes(mimetype);
 				if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
@@ -137,18 +134,21 @@ export class MemberResolver {
 				const url = `uploads/${target}/${imageName}`;
 				const stream = createReadStream();
 
-				await new Promise<void>((resolve, reject) => {
+				const result = await new Promise((resolve, reject) => {
 					stream
 						.pipe(createWriteStream(url))
-						.on('finish', () => resolve())
-						.on('error', () => reject());
+						.on('finish', () => resolve(true))
+						.on('error', () => reject(false));
 				});
+				if (!result) throw new Error(Message.UPLOAD_FAILED);
 
 				uploadedImages[index] = url;
 			} catch (err) {
 				console.log('Error, file missing!');
 			}
 		});
+
+		console.log('promisedList:', promisedList);
 
 		await Promise.all(promisedList);
 		return uploadedImages;
