@@ -41,6 +41,10 @@ const ServiceSchema = new Schema(
 			default: 0,
 			min: 0,
 		},
+
+		deletedAt: {
+			type: Date,
+		},
 	},
 	{ timestamps: true, collection: 'services' },
 );
