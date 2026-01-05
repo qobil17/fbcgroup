@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { Service } from '../../libs/dto/service/service';
-import { ServiceInput } from '../../libs/dto/service/service.input';
-import { Message } from '../../libs/enums/common.enum';
+import { Service, Services } from '../../libs/dto/service/service';
+import { ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
+import { Direction, Message } from '../../libs/enums/common.enum';
 import { ServiceCollection } from '../../libs/enums/service.enum';
 import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum';
@@ -84,6 +84,56 @@ export class ServiceService {
 		}
 
 		return result;
+	}
+
+	public async getServices(memberId: ObjectId, input: ServicesInquiry): Promise<Services> {
+		const match: T = { deletedAt: null };
+
+		const sort: T = {
+			[input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC,
+		};
+
+		this.shapeMatchQuery(match, input);
+		console.log('match:', match);
+
+		const result = await this.serviceModel
+			.aggregate([
+				{ $match: match },
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+
+		if (!result.length) {
+			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		}
+
+		return result[0];
+	}
+
+	private shapeMatchQuery(match: T, input: ServicesInquiry): void {
+		const { serviceCollection, serviceType, serviceArea, text } = input.search;
+
+		if (serviceCollection) {
+			match.serviceCollection = serviceCollection;
+		}
+
+		if (serviceType) {
+			match.serviceType = serviceType;
+		}
+
+		if (serviceArea) {
+			match.serviceArea = serviceArea;
+		}
+
+		if (text) {
+			match.serviceDesc = { $regex: new RegExp(text, 'i') };
+		}
 	}
 
 	public async serviceStatsEditor(input: StatisticModifier): Promise<Service> {
