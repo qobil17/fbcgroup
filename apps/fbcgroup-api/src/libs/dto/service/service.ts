@@ -1,6 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { ServiceArea, ServiceCollection, ServiceType } from '../../enums/service.enum';
+import { Member } from '../member/member';
 
 @ObjectType()
 export class Service {

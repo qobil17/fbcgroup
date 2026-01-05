@@ -1,7 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum ServiceCollection {
-	ALIF = 'ALIF LIGHT',
+	ALIF = 'ALIF ',
 	HPLINE = 'HPLINE',
 }
 
