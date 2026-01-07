@@ -1,6 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
-import { ServiceArea, ServiceCollection, ServiceType } from '../../enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../../enums/service.enum';
 import { Member, TotalCounter } from '../member/member';
 
 @ObjectType()
@@ -11,8 +11,14 @@ export class Service {
 	@Field(() => ServiceCollection)
 	serviceCollection: ServiceCollection;
 
+	@Field(() => String)
+	serviceTitle: string;
+
 	@Field(() => ServiceType)
 	serviceType: ServiceType;
+
+	@Field(() => ServiceStatus)
+	serviceStatus: ServiceStatus;
 
 	@Field(() => ServiceArea)
 	serviceArea: ServiceArea;

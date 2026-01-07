@@ -4,7 +4,7 @@ import { Model, ObjectId } from 'mongoose';
 import { Service, Services } from '../../libs/dto/service/service';
 import { ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
 import { Direction, Message } from '../../libs/enums/common.enum';
-import { ServiceCollection } from '../../libs/enums/service.enum';
+import { ServiceCollection, ServiceStatus } from '../../libs/enums/service.enum';
 import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum';
 import { ViewInput } from '../../libs/dto/view/view.input';
@@ -23,7 +23,11 @@ export class ServiceService {
 	) {}
 	public async createService(input: ServiceInput): Promise<Service> {
 		try {
-			const result = await this.serviceModel.create(input);
+			const result = await this.serviceModel.create({
+				...input,
+				serviceStatus: input.serviceStatus ?? ServiceStatus.ACTIVE,
+			});
+
 			return result;
 		} catch (err) {
 			console.log('Error, Service.model:', err.message);
@@ -34,6 +38,8 @@ export class ServiceService {
 	public async getService(memberId: ObjectId, serviceId: ObjectId): Promise<Service> {
 		const search: T = {
 			_id: serviceId,
+			serviceStatus: ServiceStatus.ACTIVE,
+			deletedAt: null,
 			serviceCollection: {
 				$in: [ServiceCollection.ALIF, ServiceCollection.HPLINE],
 			},
@@ -87,7 +93,7 @@ export class ServiceService {
 	}
 
 	public async getServices(memberId: ObjectId, input: ServicesInquiry): Promise<Services> {
-		const match: T = { deletedAt: null };
+		const match: T = { deletedAt: null, serviceStatus: ServiceStatus.ACTIVE };
 
 		const sort: T = {
 			[input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC,
@@ -117,7 +123,7 @@ export class ServiceService {
 	}
 
 	private shapeMatchQuery(match: T, input: ServicesInquiry): void {
-		const { serviceCollection, serviceType, serviceArea, text } = input.search;
+		const { serviceCollection, serviceType, serviceArea, serviceStatus, text } = input.search;
 
 		if (serviceCollection) {
 			match.serviceCollection = serviceCollection;
@@ -125,6 +131,10 @@ export class ServiceService {
 
 		if (serviceType) {
 			match.serviceType = serviceType;
+		}
+
+		if (serviceStatus) {
+			match.serviceStatus = serviceStatus;
 		}
 
 		if (serviceArea) {

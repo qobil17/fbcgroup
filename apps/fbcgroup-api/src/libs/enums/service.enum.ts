@@ -1,7 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum ServiceCollection {
-	ALIF = 'ALIF ',
+	ALIF = 'ALIF',
 	HPLINE = 'HPLINE',
 }
 
@@ -26,7 +26,7 @@ registerEnumType(ProductType, {
 export enum ServiceType {
 	DELIVERY = 'DELIVERY',
 	INSTALLATION = 'INSTALLATION',
-	FULL_PROJECT = 'FULL PROJECT',
+	FULL_PROJECT = 'FULL_PROJECT',
 }
 
 registerEnumType(ServiceType, {
@@ -40,4 +40,13 @@ export enum ServiceArea {
 
 registerEnumType(ServiceArea, {
 	name: 'ServiceArea',
+});
+
+export enum ServiceStatus {
+	ACTIVE = 'ACTIVE',
+	DELETED = 'DELETED',
+}
+
+registerEnumType(ServiceStatus, {
+	name: 'ServiceStatus',
 });

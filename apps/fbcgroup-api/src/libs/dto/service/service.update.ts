@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, Length } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { ServiceArea, ServiceCollection, ServiceType } from '../../enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../../enums/service.enum';
 
 @InputType()
 export class ServiceUpdate {
@@ -16,6 +16,15 @@ export class ServiceUpdate {
 	@IsOptional()
 	@Field(() => ServiceType, { nullable: true })
 	serviceType?: ServiceType;
+
+	@IsOptional()
+	@Field(() => ServiceStatus, { nullable: true })
+	serviceStatus?: ServiceStatus;
+
+	@IsOptional()
+	@Length(3, 200)
+	@Field(() => String, { nullable: true })
+	serviceTitle?: string;
 
 	@IsOptional()
 	@Field(() => ServiceArea, { nullable: true })

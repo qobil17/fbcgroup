@@ -16,6 +16,25 @@ import { ServiceUpdate } from '../../libs/dto/service/service.update';
 export class ServiceResolver {
 	constructor(private readonly serviceService: ServiceService) {}
 
+	@UseGuards(WithoutGuard)
+	@Query((returns) => Service)
+	public async getService(@Args('serviceId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Service> {
+		console.log('Query: getService');
+		const serviceId = shapeIntoMongoObjectId(input);
+		return await this.serviceService.getService(memberId, serviceId);
+	}
+
+	@UseGuards(WithoutGuard)
+	@Query(() => Services)
+	public async getServices(
+		@Args('input') input: ServicesInquiry,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<Services> {
+		console.log('Query: getServices');
+		return await this.serviceService.getServices(memberId, input);
+	}
+
+	// ADMIN API//
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 	@Mutation(() => Service)
@@ -28,32 +47,11 @@ export class ServiceResolver {
 		return await this.serviceService.createService(input);
 	}
 
-	@UseGuards(WithoutGuard)
-	@Query((returns) => Service)
-	public async getService(@Args('serviceId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Service> {
-		console.log('Query: getService');
-		const serviceId = shapeIntoMongoObjectId(input);
-		return await this.serviceService.getService(memberId, serviceId);
-	}
-
 	@Mutation(() => Service)
 	@UseGuards(RolesGuard)
 	@Roles(MemberType.ADMIN)
-	public async updateService(
-		@Args('input', { type: () => ServiceUpdate }) input: ServiceUpdate,
-		@AuthMember('_id') memberId: ObjectId,
-		@AuthMember('memberType') memberType: MemberType,
-	): Promise<Service> {
+	public async updateService(@Args('input') input: ServiceUpdate): Promise<Service> {
+		console.log('Mutation: updateService');
 		return this.serviceService.updateService(input);
-	}
-
-	@UseGuards(WithoutGuard)
-	@Query(() => Services)
-	public async getServices(
-		@Args('input') input: ServicesInquiry,
-		@AuthMember('_id') memberId: ObjectId,
-	): Promise<Services> {
-		console.log('Query: getServices');
-		return await this.serviceService.getServices(memberId, input);
 	}
 }
