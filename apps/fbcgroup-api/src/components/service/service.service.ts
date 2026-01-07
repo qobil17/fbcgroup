@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Service, Services } from '../../libs/dto/service/service';
-import { ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
+import { AllServicesInquiry, ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { ServiceCollection, ServiceStatus } from '../../libs/enums/service.enum';
 import { StatisticModifier, T } from '../../libs/types/common';
@@ -123,7 +123,7 @@ export class ServiceService {
 	}
 
 	private shapeMatchQuery(match: T, input: ServicesInquiry): void {
-		const { serviceCollection, serviceType, serviceArea, serviceStatus, text } = input.search;
+		const { serviceCollection, serviceType, serviceArea, serviceStatus, serviceTitle, text } = input.search;
 
 		if (serviceCollection) {
 			match.serviceCollection = serviceCollection;
@@ -140,10 +140,54 @@ export class ServiceService {
 		if (serviceArea) {
 			match.serviceArea = serviceArea;
 		}
+		if (serviceTitle) {
+			match.serviceTitle = serviceTitle;
+		}
 
 		if (text) {
 			match.serviceDesc = { $regex: new RegExp(text, 'i') };
 		}
+	}
+
+	public async getAllServicesByAdmin(memberId: ObjectId, input: AllServicesInquiry): Promise<Services> {
+		const { serviceStatus, serviceCollection } = input.search;
+		const match: T = {};
+		const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
+
+		if (serviceStatus) match.serviceStatus = serviceStatus;
+		if (serviceCollection) match.serviceCollection = serviceCollection;
+
+		const result = await this.serviceModel
+			.aggregate([
+				{
+					$match: {
+						...match,
+						deletedAt: null, // faqat active service’lar
+					},
+				},
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+
+		if (!result.length) {
+			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		}
+
+		return result[0];
+	}
+
+	public async removeServiceByAdmin(serviceId: ObjectId): Promise<Service> {
+		const search: T = { _id: serviceId, serviceStatus: ServiceStatus.DELETED };
+		const result = await this.serviceModel.findOneAndDelete(search).exec();
+		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
+
+		return result;
 	}
 
 	public async serviceStatsEditor(input: StatisticModifier): Promise<Service> {

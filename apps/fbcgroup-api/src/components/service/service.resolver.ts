@@ -1,7 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ServiceService } from './service.service';
 import { Service, Services } from '../../libs/dto/service/service';
-import { ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
+import { AllServicesInquiry, ServiceInput, ServicesInquiry } from '../../libs/dto/service/service.input';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { MemberType } from '../../libs/enums/member.enum';
 import { UseGuards } from '@nestjs/common';
@@ -53,5 +53,25 @@ export class ServiceResolver {
 	public async updateService(@Args('input') input: ServiceUpdate): Promise<Service> {
 		console.log('Mutation: updateService');
 		return this.serviceService.updateService(input);
+	}
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+	@Query((returns) => Services)
+	public async getAllServicesByAdmin(
+		@Args('input') input: AllServicesInquiry,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<Services> {
+		console.log('Query: getAllServicesByAdmin');
+		return await this.serviceService.getAllServicesByAdmin(memberId, input);
+	}
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+	@Mutation((returns) => Service)
+	public async removeServiceByAdmin(@Args('propertyId') input: string): Promise<Service> {
+		console.log('Mutation: removeServiceByAdmin');
+		const serviceId = shapeIntoMongoObjectId(input);
+		return await this.serviceService.removeServiceByAdmin(serviceId);
 	}
 }

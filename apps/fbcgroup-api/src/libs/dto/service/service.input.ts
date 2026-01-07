@@ -60,6 +60,11 @@ export class SISearch {
 	serviceStatus?: ServiceStatus;
 
 	@IsOptional()
+	@Length(3, 200)
+	@Field(() => String)
+	serviceTitle?: string;
+
+	@IsOptional()
 	@Field(() => ServiceArea, { nullable: true })
 	serviceArea?: ServiceArea;
 
@@ -100,4 +105,41 @@ export class ServicesInquiry {
 	@IsNotEmpty()
 	@Field(() => SISearch)
 	search: SISearch;
+}
+
+@InputType()
+class SLPISearch {
+	@IsOptional()
+	@Field(() => ServiceStatus, { nullable: true })
+	serviceStatus?: ServiceStatus;
+
+	@IsOptional()
+	@Field(() => [ServiceCollection], { nullable: true })
+	serviceCollection?: ServiceCollection;
+}
+
+@InputType()
+export class AllServicesInquiry {
+	@IsNotEmpty()
+	@Min(1)
+	@Field(() => Int)
+	page: number;
+
+	@IsNotEmpty()
+	@Min(1)
+	@Field(() => Int)
+	limit: number;
+
+	@IsOptional()
+	@IsIn(availableServiceSorts)
+	@Field(() => String, { nullable: true })
+	sort?: string;
+
+	@IsOptional()
+	@Field(() => Direction, { nullable: true })
+	direction?: Direction;
+
+	@IsNotEmpty()
+	@Field(() => SLPISearch)
+	search: SLPISearch;
 }
