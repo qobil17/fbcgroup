@@ -70,18 +70,17 @@ export class ServiceService {
 	}
 
 	public async updateService(input: ServiceUpdate): Promise<Service> {
-		let { deletedAt } = input;
+		// let { deletedAt } = input;
 
 		const search: T = {
 			_id: input._id,
-			deletedAt: null,
 		};
 
 		// soft delete
-		if (input.deletedAt) {
-			deletedAt = moment().toDate();
-			input.deletedAt = deletedAt;
-		}
+		// if (input.deletedAt) {
+		// 	deletedAt = moment().toDate();
+		// 	input.deletedAt = deletedAt;
+		// }
 
 		const result = await this.serviceModel.findOneAndUpdate(search, input, { new: true }).exec();
 
@@ -183,7 +182,7 @@ export class ServiceService {
 	}
 
 	public async removeServiceByAdmin(serviceId: ObjectId): Promise<Service> {
-		const search: T = { _id: serviceId, serviceStatus: ServiceStatus.DELETED };
+		const search: T = { _id: serviceId, serviceStatus: ServiceStatus.DELETE };
 		const result = await this.serviceModel.findOneAndDelete(search).exec();
 		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
 

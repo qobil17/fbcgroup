@@ -1,6 +1,12 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsIn, IsNotEmpty, IsOptional, Length, Min } from 'class-validator';
-import { ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../../enums/service.enum';
+import {
+	ServiceDetail as ServiceDetail,
+	ServiceArea,
+	ServiceCollection,
+	ServiceStatus,
+	ServiceType,
+} from '../../enums/service.enum';
 import { ObjectId } from 'mongoose';
 import { availableServiceSorts } from '../../config';
 import { Direction } from '../../enums/common.enum';
@@ -23,6 +29,10 @@ export class ServiceInput {
 	@IsOptional()
 	@Field(() => ServiceStatus, { nullable: true })
 	serviceStatus?: ServiceStatus;
+
+	@IsNotEmpty()
+	@Field(() => ServiceDetail)
+	serviceDetail: ServiceDetail;
 
 	@IsNotEmpty()
 	@Field(() => ServiceArea)
@@ -61,8 +71,12 @@ export class SISearch {
 
 	@IsOptional()
 	@Length(3, 200)
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	serviceTitle?: string;
+
+	@IsOptional()
+	@Field(() => ServiceDetail, { nullable: true })
+	serviceDetail?: ServiceDetail;
 
 	@IsOptional()
 	@Field(() => ServiceArea, { nullable: true })

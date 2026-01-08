@@ -1,11 +1,9 @@
 import { Schema } from 'mongoose';
-import { ProductType } from '../libs/enums/service.enum';
 
 const ProductSchema = new Schema(
 	{
 		productType: {
 			type: String,
-			enum: ProductType,
 			required: true,
 		},
 

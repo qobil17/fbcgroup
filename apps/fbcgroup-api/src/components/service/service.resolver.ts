@@ -69,7 +69,7 @@ export class ServiceResolver {
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 	@Mutation((returns) => Service)
-	public async removeServiceByAdmin(@Args('propertyId') input: string): Promise<Service> {
+	public async removeServiceByAdmin(@Args('serviceId') input: ServiceUpdate): Promise<Service> {
 		console.log('Mutation: removeServiceByAdmin');
 		const serviceId = shapeIntoMongoObjectId(input);
 		return await this.serviceService.removeServiceByAdmin(serviceId);

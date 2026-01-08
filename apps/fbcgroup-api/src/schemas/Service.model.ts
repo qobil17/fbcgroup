@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../libs/enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceDetail, ServiceStatus, ServiceType } from '../libs/enums/service.enum';
 
 const ServiceSchema = new Schema(
 	{
@@ -26,6 +26,12 @@ const ServiceSchema = new Schema(
 			type: String,
 			enum: ServiceStatus,
 			default: ServiceStatus.ACTIVE,
+		},
+
+		serviceDetail: {
+			type: String,
+			enum: ServiceDetail,
+			required: true,
 		},
 
 		serviceArea: {

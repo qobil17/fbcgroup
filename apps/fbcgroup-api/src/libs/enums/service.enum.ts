@@ -9,7 +9,7 @@ registerEnumType(ServiceCollection, {
 	name: 'ServiceCollection',
 });
 
-export enum ProductType {
+export enum ServiceDetail {
 	HPL = 'HPL',
 	ALIKAFON = 'ALIKAFON',
 	GRANITE = 'GRANITE',
@@ -19,8 +19,8 @@ export enum ProductType {
 	EMERGENCY_LIGHT = 'EMERGENCY_LIGHT',
 }
 
-registerEnumType(ProductType, {
-	name: 'ProductType',
+registerEnumType(ServiceDetail, {
+	name: 'ServiceDetail',
 });
 
 export enum ServiceType {
@@ -44,7 +44,7 @@ registerEnumType(ServiceArea, {
 
 export enum ServiceStatus {
 	ACTIVE = 'ACTIVE',
-	DELETED = 'DELETED',
+	DELETE = 'DELETE',
 }
 
 registerEnumType(ServiceStatus, {
