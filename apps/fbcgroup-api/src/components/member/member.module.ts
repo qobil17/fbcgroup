@@ -6,6 +6,8 @@ import MemberSchema from '../../schemas/Member.model';
 import { AuthModule } from '../auth/auth.module';
 import { ViewModule } from '../view/view.module';
 import { ServiceModule } from '../service/service.module';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { OrderServiceModule } from '../orderservice/orderservice.module';
 
 @Module({
 	imports: [
@@ -16,8 +18,9 @@ import { ServiceModule } from '../service/service.module';
 			},
 		]),
 		AuthModule,
+		OrderServiceModule,
 	],
 	exports: [MemberService],
-	providers: [MemberResolver, MemberService],
+	providers: [MemberResolver, MemberService, RolesGuard],
 })
 export class MemberModule {}
