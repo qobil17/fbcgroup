@@ -37,14 +37,7 @@ const OrderSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		orderTotal: {
-			type: Number,
-			required: true,
-		},
-		orderDelivery: {
-			type: Number,
-			required: true,
-		},
+
 		orderStatus: {
 			type: String,
 			enum: OrderStatus,

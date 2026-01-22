@@ -1,13 +1,17 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { Member } from '../member/member';
 import { OrderStatus } from '../../enums/order.enum';
 import { ServiceArea, ServiceCollection, ServiceDetail, ServiceType } from '../../enums/service.enum';
+import { IsNotEmpty } from 'class-validator';
 
 @ObjectType()
 export class Order {
+	@Field(() => String)
+	_id: string;
+
 	@Field(() => Member)
-	memberId: Member;
+	member: Member;
 
 	@Field(() => String)
 	phone: string;
@@ -35,4 +39,19 @@ export class Order {
 
 	@Field(() => Date, { nullable: true })
 	deletedAt?: Date;
+}
+
+@ObjectType()
+export class OrderTotalCounter {
+	@Field(() => Int, { nullable: true })
+	total: number;
+}
+
+@ObjectType()
+export class Orders {
+	@Field(() => [Order])
+	list: Order[];
+
+	@Field(() => OrderTotalCounter, { nullable: true })
+	metaCounter: OrderTotalCounter;
 }

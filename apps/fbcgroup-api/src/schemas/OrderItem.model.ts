@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { ServiceType } from '../libs/enums/service.enum';
 
-const OrderServiceSchema = new Schema(
+const OrderItemSchema = new Schema(
 	{
 		orderId: {
 			type: Schema.Types.ObjectId,
@@ -26,7 +26,7 @@ const OrderServiceSchema = new Schema(
 			required: true,
 		},
 	},
-	{ timestamps: true, collection: 'orderService' },
+	{ timestamps: true, collection: 'orderItem' },
 );
 
-export default OrderServiceSchema;
+export default OrderItemSchema;

@@ -19,7 +19,6 @@ export class ServiceService {
 	constructor(
 		@InjectModel('Service') private readonly serviceModel: Model<Service>,
 		private viewService: ViewService,
-		private memberService: MemberService,
 	) {}
 	public async createService(input: ServiceInput): Promise<Service> {
 		try {

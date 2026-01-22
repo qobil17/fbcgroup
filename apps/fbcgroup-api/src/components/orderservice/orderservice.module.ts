@@ -3,13 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { OrderServiceService } from './orderservice.service';
 import OrderSchema from '../../schemas/Order.model';
-import OrderServiceSchema from '../../schemas/OrderService.model';
+import OrderItemSchema from '../../schemas/OrderItem.model';
 
 @Module({
 	imports: [
 		MongooseModule.forFeature([
 			{ name: 'Order', schema: OrderSchema },
-			{ name: 'OrderItem', schema: OrderServiceSchema },
+			{ name: 'OrderItem', schema: OrderItemSchema },
 		]),
 	],
 	providers: [OrderServiceService],

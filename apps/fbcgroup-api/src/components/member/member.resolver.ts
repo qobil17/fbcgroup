@@ -15,8 +15,9 @@ import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import { Message } from '../../libs/enums/common.enum';
 import { OrderServiceService } from '../orderservice/orderservice.service';
-import { Order } from '../../libs/dto/orderService/order';
-import { OrderInput } from '../../libs/dto/orderService/order.input';
+import { Order, Orders } from '../../libs/dto/orderService/order';
+import { OrderInput, OrdersInquiry } from '../../libs/dto/orderService/order.input';
+import { OrderUpdate } from '../../libs/dto/orderService/order.update';
 
 @Resolver()
 export class MemberResolver {
@@ -45,7 +46,7 @@ export class MemberResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Member> {
 		console.log('Mutation: updateMember');
-
+		input._id = shapeIntoMongoObjectId(input._id);
 		return await this.memberService.updateMember(memberId, input);
 	}
 
@@ -70,11 +71,47 @@ export class MemberResolver {
 	}
 
 	@Roles(MemberType.USER)
+	@UseGuards(RolesGuard)
+	@Query(() => String)
+	public async checkAuthRoles(@AuthMember() AuthMember: Member): Promise<string> {
+		console.log('Query: checkAuthRoles');
+		return `Hi ${AuthMember.memberNick}, you are ${AuthMember.memberType} (memberId: ${AuthMember._id})`;
+	}
+
+	@Roles(MemberType.USER)
+	@UseGuards(RolesGuard)
+	@Mutation(() => Order)
+	public async createOrder(@Args('input') input: OrderInput, @AuthMember('_id') memberId: ObjectId): Promise<Order> {
+		console.log('Mutation: createOrder');
+		input.memberId = memberId;
+		return await this.orderService.createOrder(input);
+	}
+
+	@Roles(MemberType.USER)
+	@UseGuards(RolesGuard)
+	@Query(() => Order)
+	public async getOrder(@Args('orderId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Order> {
+		console.log('Query: getOrder');
+		const orderId = shapeIntoMongoObjectId(input);
+		return await this.orderService.getOrder(memberId, orderId);
+	}
+
+	@Roles(MemberType.USER)
+	@UseGuards(RolesGuard)
+	@Query(() => Orders)
+	public async myOrder(@AuthMember('_id') memberId: ObjectId): Promise<Orders> {
+		return this.orderService.myOrder(memberId);
+	}
+
+	@Roles(MemberType.USER)
 	@UseGuards(AuthGuard)
 	@Mutation(() => Order)
-	public async createOrder(@Args('input') input: OrderInput): Promise<Order> {
-		console.log('Mutation: createOrder');
-		return await this.orderService.createOrder(input);
+	public async updateOrder(@Args('input') input: OrderUpdate, @AuthMember('_id') memberId: ObjectId): Promise<Order> {
+		console.log('Mutation: updateOrder');
+
+		input.orderId = shapeIntoMongoObjectId(input.orderId);
+
+		return await this.orderService.updateOrder(memberId, input);
 	}
 
 	// * ADMIN *//
@@ -85,6 +122,17 @@ export class MemberResolver {
 	public async getAllMembersByAdmin(@Args('input') input: MembersInquiry): Promise<Members> {
 		console.log('Quer: getAllMembersByAdmin');
 		return await this.memberService.getAllMembersByAdmin(input);
+	}
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(AuthGuard, RolesGuard)
+	@Query((returns) => Orders)
+	public async getAllOrdersByAdmin(
+		@Args('input') input: OrdersInquiry,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<Orders> {
+		console.log('Query: getAllServicesByAdmin');
+		return await this.orderService.getAllOrdersByAdmin(input, memberId);
 	}
 
 	@Roles(MemberType.ADMIN)

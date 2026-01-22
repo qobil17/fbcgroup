@@ -8,6 +8,9 @@ export class Service {
 	@Field(() => String)
 	_id: ObjectId;
 
+	@Field(() => String)
+	memberId: string;
+
 	@Field(() => ServiceCollection)
 	serviceCollection: ServiceCollection;
 

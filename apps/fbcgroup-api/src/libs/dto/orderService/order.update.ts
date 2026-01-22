@@ -8,7 +8,7 @@ import { OrderStatus } from '../../enums/order.enum';
 export class OrderUpdate {
 	@IsNotEmpty()
 	@Field(() => String)
-	orderId: ObjectId; // Yangilanayotgan order ID
+	orderId: string; // Yangilanayotgan order ID
 
 	@IsOptional()
 	@Field(() => ServiceCollection, { nullable: true })
