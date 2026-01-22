@@ -88,10 +88,7 @@ export class OrderServiceService {
 		return result;
 	}
 
-	public async getAllOrdersByAdmin(
-		input: OrdersInquiry,
-		memberId: ObjectId, // admin ekanini guard tekshiradi
-	): Promise<Orders> {
+	public async getAllOrdersByAdmin(input: OrdersInquiry, memberId: ObjectId): Promise<Orders> {
 		const { orderStatus, serviceCollection } = input.search;
 
 		const match: T = {
@@ -102,7 +99,6 @@ export class OrderServiceService {
 			[input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC,
 		};
 
-		// ✅ TO‘G‘RI FIELD
 		if (orderStatus) match.orderStatus = orderStatus;
 		if (serviceCollection) match.serviceCollection = { $in: serviceCollection };
 
@@ -128,6 +124,15 @@ export class OrderServiceService {
 						metaCounter: [{ $count: 'total' }],
 					},
 				},
+
+				{
+					$project: {
+						list: 1,
+						metaCounter: {
+							$ifNull: [{ $arrayElemAt: ['$metaCounter', 0] }, { total: 0 }],
+						},
+					},
+				},
 			])
 			.exec();
 
@@ -135,9 +140,6 @@ export class OrderServiceService {
 			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		}
 
-		return {
-			list: result[0].list,
-			metaCounter: result[0].metaCounter[0] ?? { total: 0 },
-		};
+		return result[0];
 	}
 }
