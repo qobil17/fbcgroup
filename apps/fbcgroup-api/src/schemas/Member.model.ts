@@ -7,6 +7,7 @@ const MemberSchema = new Schema(
 			type: String,
 			enum: MemberType,
 			default: MemberType.USER,
+			immutable: true,
 		},
 
 		memberStatus: {

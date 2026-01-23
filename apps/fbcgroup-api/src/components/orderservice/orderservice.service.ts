@@ -91,9 +91,7 @@ export class OrderServiceService {
 	public async getAllOrdersByAdmin(input: OrdersInquiry, memberId: ObjectId): Promise<Orders> {
 		const { orderStatus, serviceCollection } = input.search;
 
-		const match: T = {
-			deletedAt: null,
-		};
+		const match: T = {};
 
 		const sort: T = {
 			[input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC,
@@ -104,7 +102,12 @@ export class OrderServiceService {
 
 		const result = await this.orderModel
 			.aggregate([
-				{ $match: match },
+				{
+					$match: {
+						...match,
+						deletedAt: null,
+					},
+				},
 
 				{
 					$lookup: {
@@ -122,15 +125,6 @@ export class OrderServiceService {
 					$facet: {
 						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
 						metaCounter: [{ $count: 'total' }],
-					},
-				},
-
-				{
-					$project: {
-						list: 1,
-						metaCounter: {
-							$ifNull: [{ $arrayElemAt: ['$metaCounter', 0] }, { total: 0 }],
-						},
 					},
 				},
 			])

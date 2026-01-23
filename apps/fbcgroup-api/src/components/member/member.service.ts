@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { LoginInput, MemberInput, MembersInquiry } from '../../libs/dto/member/member.input';
 import { Member, Members } from '../../libs/dto/member/member';
-import { MemberStatus } from '../../libs/enums/member.enum';
+import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { AuthService } from '../auth/auth.service';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
@@ -16,9 +16,16 @@ export class MemberService {
 	) {}
 
 	public async signup(input: MemberInput): Promise<Member> {
-		input.memberPassword = await this.authService.hashPassword(input.memberPassword);
+		if (input.memberPassword) {
+			input.memberPassword = await this.authService.hashPassword(input.memberPassword);
+		}
+
 		try {
-			const result = await this.memberModel.create(input);
+			const result = await this.memberModel.create({
+				...input,
+				memberType: MemberType.USER,
+				memberStatus: MemberStatus.ACTIVE,
+			});
 
 			result.accessToken = await this.authService.createToken(result);
 			return result;

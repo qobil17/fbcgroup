@@ -11,10 +11,6 @@ export class MemberUpdate {
 	_id: ObjectId;
 
 	@IsOptional()
-	@Field(() => MemberType, { nullable: true })
-	memberType?: MemberType;
-
-	@IsOptional()
 	@Field(() => MemberStatus, { nullable: true })
 	memberStatus?: MemberStatus;
 
