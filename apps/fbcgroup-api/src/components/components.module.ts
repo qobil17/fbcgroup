@@ -4,8 +4,9 @@ import { AuthModule } from './auth/auth.module';
 import { ViewModule } from './view/view.module';
 import { ServiceModule } from './service/service.module';
 import { OrderServiceModule } from './orderservice/orderservice.module';
+import { ProjectModule } from './project/project.module';
 
 @Module({
-	imports: [MemberModule, AuthModule, ViewModule, ServiceModule, OrderServiceModule],
+	imports: [MemberModule, AuthModule, ViewModule, ServiceModule, OrderServiceModule, ProjectModule],
 })
 export class ComponentsModule {}

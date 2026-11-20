@@ -11,9 +11,9 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
-import { getSerialForImage, shapeIntoMongoObjectId, validMimeTypes } from '../../libs/config';
+import { shapeIntoMongoObjectId } from '../../libs/config';
+import { MAX_UPLOAD_FILES, saveImage } from '../../libs/image';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
-import { createWriteStream, mkdirSync } from 'fs';
 import { Message } from '../../libs/enums/common.enum';
 import { OrderServiceService } from '../orderservice/orderservice.service';
 import { Order, Orders } from '../../libs/dto/orderService/order';
@@ -154,25 +154,10 @@ export class MemberResolver {
 		@Args('target') target: String,
 	): Promise<string> {
 		if (!filename) throw new Error(Message.UPLOAD_FAILED);
-		const validMime = validMimeTypes.includes(mimetype);
-		if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
-
-		const imageName = getSerialForImage(filename);
-		const dir = `uploads/${target}`;
-		mkdirSync(dir, { recursive: true });
-		const url = `${dir}/${imageName}`;
-		const stream = createReadStream();
-
-		await new Promise<void>((resolve, reject) => {
-			stream
-				.pipe(createWriteStream(url))
-				.on('finish', () => resolve())
-				.on('error', (err) => reject(new Error(`${Message.UPLOAD_FAILED}: ${err.message}`)));
-		});
-
-		return url;
+		return await saveImage(createReadStream, mimetype, String(target));
 	}
 
+	// Bir nechta rasm: bittasi xato bo'lsa ham, qaysi rasm ekanini aytib to'xtaydi
 	@UseGuards(AuthGuard)
 	@Mutation((returns) => [String])
 	public async imagesUploader(
@@ -180,34 +165,16 @@ export class MemberResolver {
 		files: Promise<FileUpload>[],
 		@Args('target') target: String,
 	): Promise<string[]> {
-		const uploadedImages = [];
-		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<Promise<void>> => {
+		if (files.length > MAX_UPLOAD_FILES) throw new Error(`Bir martada ${MAX_UPLOAD_FILES} tagacha rasm yuklash mumkin`);
+		const uploaded: string[] = [];
+		for (const [index, img] of files.entries()) {
+			const { filename, mimetype, createReadStream } = await img;
 			try {
-				const { filename, mimetype, encoding, createReadStream } = await img;
-
-				const validMime = validMimeTypes.includes(mimetype);
-				if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
-
-				const imageName = getSerialForImage(filename);
-				const dir = `uploads/${target}`;
-				mkdirSync(dir, { recursive: true });
-				const url = `${dir}/${imageName}`;
-				const stream = createReadStream();
-
-				await new Promise<void>((resolve, reject) => {
-					stream
-						.pipe(createWriteStream(url))
-						.on('finish', () => resolve())
-						.on('error', (err) => reject(new Error(`${Message.UPLOAD_FAILED}: ${err.message}`)));
-				});
-
-				uploadedImages[index] = url;
+				uploaded.push(await saveImage(createReadStream, mimetype, String(target)));
 			} catch (err) {
-				// Individual file failure is swallowed so remaining uploads complete
+				throw new Error(`${index + 1}-rasm (${filename}): ${err.message}`);
 			}
-		});
-
-		await Promise.all(promisedList);
-		return uploadedImages;
+		}
+		return uploaded;
 	}
 }

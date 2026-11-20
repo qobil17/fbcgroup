@@ -7,6 +7,7 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { WsAdapter } from '@nestjs/platform-ws';
 import helmet from 'helmet';
 import { join } from 'path';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_FILES } from './libs/image';
 import * as dns from 'dns';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -36,7 +37,7 @@ async function bootstrap() {
 	});
 
 	// File uploads
-	app.use(graphqlUploadExpress({ maxFileSize: 5 * 1024 * 1024, maxFiles: 5 }));
+	app.use(graphqlUploadExpress({ maxFileSize: MAX_UPLOAD_BYTES, maxFiles: MAX_UPLOAD_FILES }));
 
 	// WebSocket
 	app.useWebSocketAdapter(new WsAdapter(app));
