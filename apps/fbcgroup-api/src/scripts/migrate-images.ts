@@ -10,10 +10,14 @@
  * (bulutga o'tib bo'lgan https manzillar qayta ishlanmaydi).
  */
 import 'dotenv/config';
+import * as dns from 'dns';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import * as mongoose from 'mongoose';
 import { compressForTarget, storeImage, useCloudStorage } from '../libs/image';
+
+// Ba'zi Windows tarmoqlarida mongodb+srv manzili topilmaydi (querySrv ECONNREFUSED) — main.ts dagi kabi ochiq DNS ishlatamiz
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const DRY = process.argv.includes('--dry');
 const PROD = process.argv.includes('--prod');
