@@ -14,8 +14,18 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+	// Render/Railway proksi orqasida: haqiqiy mijoz IP'si X-Forwarded-For dan olinadi
+	// (aks holda so'rov limiti barcha tashrifchilar uchun umumiy bo'lib qoladi)
+	app.set('trust proxy', 1);
+
 	// Security headers
-	app.use(helmet({ contentSecurityPolicy: process.env.NODE_ENV === 'production' }));
+	app.use(
+		helmet({
+			contentSecurityPolicy: process.env.NODE_ENV === 'production',
+			// /uploads rasmlari boshqa domendagi (Vercel) saytda ko'rinishi uchun
+			crossOriginResourcePolicy: { policy: 'cross-origin' },
+		}),
+	);
 
 	// Validation
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
@@ -23,7 +33,7 @@ async function bootstrap() {
 
 	// CORS — origins from env, comma-separated (e.g. "https://example.com,https://www.example.com")
 	app.enableCors({
-		origin: process.env.ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
+		origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean) ?? ['http://localhost:3000'],
 		credentials: true,
 	});
 
