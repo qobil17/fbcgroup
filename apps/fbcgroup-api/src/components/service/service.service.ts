@@ -141,7 +141,11 @@ export class ServiceService {
 
 		if (text) {
 			const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			match.serviceDesc = { $regex: new RegExp(escaped, 'i') };
+			const rx = { $regex: new RegExp(escaped, 'i') };
+			// qidiruv barcha tillardagi nom va tavsif bo'yicha
+			match.$or = ['serviceTitle', 'serviceTitleRu', 'serviceTitleEn', 'serviceDesc', 'serviceDescRu', 'serviceDescEn'].map(
+				(f) => ({ [f]: rx }),
+			);
 		}
 	}
 

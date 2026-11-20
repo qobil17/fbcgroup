@@ -55,6 +55,12 @@ const ServiceSchema = new Schema(
 			type: String,
 		},
 
+		// Tarjimalar (ixtiyoriy). Bo'sh bo'lsa sayt o'zbekcha nom/tavsifni ko'rsatadi
+		serviceTitleRu: { type: String, trim: true },
+		serviceTitleEn: { type: String, trim: true },
+		serviceDescRu: { type: String },
+		serviceDescEn: { type: String },
+
 		serviceImages: {
 			type: [String],
 			default: [],

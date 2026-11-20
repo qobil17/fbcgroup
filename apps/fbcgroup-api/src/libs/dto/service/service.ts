@@ -35,6 +35,18 @@ export class Service {
 	@Field(() => String, { nullable: true })
 	serviceDesc?: string;
 
+	@Field(() => String, { nullable: true })
+	serviceTitleRu?: string;
+
+	@Field(() => String, { nullable: true })
+	serviceTitleEn?: string;
+
+	@Field(() => String, { nullable: true })
+	serviceDescRu?: string;
+
+	@Field(() => String, { nullable: true })
+	serviceDescEn?: string;
+
 	@Field(() => [String])
 	serviceImages: string[];
 

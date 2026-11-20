@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import sharp = require('sharp');
 import { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
 
 /**
  * Rasm yuklash qoidalari — frontend (lib/uploadImage.ts) bilan bir xil bo'lishi kerak.
@@ -9,7 +10,14 @@ import { Readable } from 'stream';
  *  - formatlar: JPG, JPEG, PNG, WEBP
  *  - saqlashdan oldin: telefon aylanishi (EXIF) to'g'rilanadi, uzun tomoni cheklanadi,
  *    WebP formatida yuqori sifat bilan siqiladi (ko'zga farq sezilmaydi, hajm 5–10 barobar kichrayadi)
+ *
+ * Saqlash joyi:
+ *  - CLOUDINARY_URL berilgan bo'lsa → Cloudinary (bepul bulut). Qaytariladigan qiymat to'liq https manzil.
+ *  - berilmagan bo'lsa → server diskidagi uploads/ papkasi. Qaytariladigan qiymat "uploads/..." yo'li.
+ *  Frontend ikkalasini ham to'g'ri ko'rsatadi (getImageUrl https manzilni o'zgartirmaydi).
  */
+export const useCloudStorage = () => !!process.env.CLOUDINARY_URL;
+const CLOUD_FOLDER = process.env.CLOUDINARY_FOLDER || 'fbcgroup';
 export const MAX_UPLOAD_MB = 15;
 export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 export const MAX_UPLOAD_FILES = 12;
@@ -70,9 +78,40 @@ export const saveImage = async (
 		throw new ImageUploadError('Rasmni o‘qib bo‘lmadi — fayl buzilgan yoki rasm emas');
 	}
 
+	return storeImage(output, target);
+};
+
+/** Tayyor (siqilgan) rasmni bulutga yoki diskka yozadi va manzilini qaytaradi. */
+export const storeImage = async (output: Buffer, target: string): Promise<string> => {
+	const id = uuidv4();
+
+	if (useCloudStorage()) {
+		return new Promise<string>((resolve, reject) => {
+			cloudinary.uploader
+				.upload_stream(
+					{ folder: `${CLOUD_FOLDER}/${target}`, public_id: id, resource_type: 'image', format: 'webp', overwrite: false },
+					(err, result) => {
+						if (err || !result?.secure_url) reject(new ImageUploadError(`Bulutga yuklab bo'lmadi: ${err?.message ?? 'javob yo‘q'}`));
+						else resolve(result.secure_url);
+					},
+				)
+				.end(output);
+		});
+	}
+
 	const dir = `uploads/${target}`;
 	mkdirSync(dir, { recursive: true });
-	const url = `${dir}/${uuidv4()}.webp`;
+	const url = `${dir}/${id}.webp`;
 	writeFileSync(url, output);
 	return url;
+};
+
+/** Diskdagi eski rasmni siqib, bulutga ko'chirish uchun (migratsiya skripti ishlatadi). */
+export const compressForTarget = async (input: Buffer, target: string): Promise<Buffer> => {
+	const rule = TARGETS[target] ?? TARGETS.services;
+	return sharp(input, { failOn: 'error' })
+		.rotate()
+		.resize({ width: rule.maxSide, height: rule.maxSide, fit: 'inside', withoutEnlargement: true })
+		.webp({ quality: rule.quality, effort: 4, smartSubsample: true })
+		.toBuffer();
 };
