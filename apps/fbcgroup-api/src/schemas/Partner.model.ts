@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { PartnerStatus } from '../libs/enums/project.enum';
+import { PartnerStatus } from '../libs/enums/partner.enum';
 
 // Hamkor: nomi, logotipi, sayti va saytdagi tartib raqami
 const PartnerSchema = new Schema(

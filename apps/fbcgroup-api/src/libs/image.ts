@@ -19,7 +19,6 @@ export const validMimeTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/we
 const TARGETS: Record<string, { maxSide: number; quality: number }> = {
 	members: { maxSide: 800, quality: 85 },
 	services: { maxSide: 2400, quality: 85 },
-	projects: { maxSide: 2400, quality: 85 },
 	partners: { maxSide: 800, quality: 92 }, // logotiplar: aniq chiziqlar uchun yuqoriroq sifat
 };
 
