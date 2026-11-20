@@ -17,6 +17,30 @@ import { v2 as cloudinary } from 'cloudinary';
  *  Frontend ikkalasini ham to'g'ri ko'rsatadi (getImageUrl https manzilni o'zgartirmaydi).
  */
 export const useCloudStorage = () => !!process.env.CLOUDINARY_URL;
+
+// Cloudinary SDK CLOUDINARY_URL ni faqat kutubxona yuklangan paytda o'qiydi, NestJS esa .env ni
+// keyinroq yuklaydi — shuning uchun kalitlarni yuklashdan oldin URL'dan o'zimiz o'rnatamiz.
+let cloudConfiguredFor = '';
+const ensureCloudinaryConfig = () => {
+	const raw = process.env.CLOUDINARY_URL ?? '';
+	if (raw === cloudConfiguredFor) return;
+	let url: URL;
+	try {
+		url = new URL(raw.trim());
+	} catch {
+		throw new ImageUploadError('CLOUDINARY_URL noto‘g‘ri: cloudinary://API_KEY:API_SECRET@CLOUD_NAME ko‘rinishida bo‘lishi kerak');
+	}
+	if (url.protocol !== 'cloudinary:' || !url.username || !url.password || !url.hostname) {
+		throw new ImageUploadError('CLOUDINARY_URL noto‘g‘ri: cloudinary://API_KEY:API_SECRET@CLOUD_NAME ko‘rinishida bo‘lishi kerak');
+	}
+	cloudinary.config({
+		cloud_name: url.hostname,
+		api_key: decodeURIComponent(url.username),
+		api_secret: decodeURIComponent(url.password),
+		secure: true,
+	});
+	cloudConfiguredFor = raw;
+};
 const CLOUD_FOLDER = process.env.CLOUDINARY_FOLDER || 'fbcgroup';
 export const MAX_UPLOAD_MB = 15;
 export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
@@ -86,6 +110,7 @@ export const storeImage = async (output: Buffer, target: string): Promise<string
 	const id = uuidv4();
 
 	if (useCloudStorage()) {
+		ensureCloudinaryConfig();
 		return new Promise<string>((resolve, reject) => {
 			cloudinary.uploader
 				.upload_stream(
