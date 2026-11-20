@@ -30,7 +30,6 @@ export class MemberService {
 			result.accessToken = await this.authService.createToken(result);
 			return result;
 		} catch (err) {
-			console.log('Error, Service.model:', err.message);
 			throw new BadRequestException(Message.USED_MEMBER_NICK_OR_PHONE);
 		}
 	}
@@ -90,16 +89,17 @@ export class MemberService {
 
 		if (memberStatus) match.memberStatus = memberStatus;
 		if (memberType) match.memberType = memberType;
-		if (text) match.memberNick = { $regex: new RegExp(text, 'i') };
-		console.log('match:', match);
-
+		if (text) {
+			const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			match.memberNick = { $regex: new RegExp(escaped, 'i') };
+		}
 		const result = await this.memberModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: sort },
 				{
 					$facet: {
-						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: Math.min(input.limit, 100) }],
 						metaCounter: [{ $count: 'total' }],
 					},
 				},

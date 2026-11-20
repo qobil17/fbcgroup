@@ -21,6 +21,7 @@ export class ServiceService {
 		private viewService: ViewService,
 	) {}
 	public async createService(input: ServiceInput): Promise<Service> {
+		console.log('createService input:', JSON.stringify(input, null, 2));
 		try {
 			const result = await this.serviceModel.create({
 				...input,
@@ -29,7 +30,7 @@ export class ServiceService {
 
 			return result;
 		} catch (err) {
-			console.log('Error, Service.model:', err.message);
+			console.log('createService error:', err);
 			throw new BadRequestException(Message.CREATE_FAILED);
 		}
 	}
@@ -45,7 +46,6 @@ export class ServiceService {
 		};
 
 		const targetServcie: Service = await this.serviceModel.findOne(search).lean().exec();
-		console.log('targetServcie:', targetServcie);
 		if (!targetServcie) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
 		if (memberId) {
@@ -59,8 +59,7 @@ export class ServiceService {
 				});
 
 				targetServcie.serviceViews = updatedService.serviceViews;
-				console.log('targetService:', targetServcie.serviceViews);
-			}
+		}
 		}
 
 		// targetServcie.memberData = await this.memberService.getMember(null, targetServcie.memberId);
@@ -98,15 +97,13 @@ export class ServiceService {
 		};
 
 		this.shapeMatchQuery(match, input);
-		console.log('match:', match);
-
 		const result = await this.serviceModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: sort },
 				{
 					$facet: {
-						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: Math.min(input.limit, 100) }],
 						metaCounter: [{ $count: 'total' }],
 					},
 				},
@@ -143,7 +140,8 @@ export class ServiceService {
 		}
 
 		if (text) {
-			match.serviceDesc = { $regex: new RegExp(text, 'i') };
+			const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			match.serviceDesc = { $regex: new RegExp(escaped, 'i') };
 		}
 	}
 
@@ -166,7 +164,7 @@ export class ServiceService {
 				{ $sort: sort },
 				{
 					$facet: {
-						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: Math.min(input.limit, 100) }],
 						metaCounter: [{ $count: 'total' }],
 					},
 				},

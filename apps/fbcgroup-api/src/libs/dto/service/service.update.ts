@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsIn, Length } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { ServiceDetail, ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../../enums/service.enum';
+import { ServiceDetailHpline, ServiceDetailAlif, ServiceArea, ServiceCollection, ServiceStatus, ServiceType } from '../../enums/service.enum';
 
 @InputType()
 export class ServiceUpdate {
@@ -22,8 +22,9 @@ export class ServiceUpdate {
 	serviceStatus?: ServiceStatus;
 
 	@IsOptional()
-	@Field(() => ServiceDetail, { nullable: true })
-	serviceDetail?: ServiceDetail;
+	@IsIn([...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)])
+	@Field(() => String, { nullable: true })
+	serviceDetail?: string;
 
 	@IsOptional()
 	@Length(3, 200)
@@ -46,9 +47,11 @@ export class ServiceUpdate {
 	@Field(() => [String], { nullable: true })
 	serviceImages?: string[];
 
-	// ❗ soft delete uchun
+	// ❗ soft delete uchun — @IsOptional so forbidNonWhitelisted skips it
+	@IsOptional()
 	deletedAt?: Date;
 
-	// GraphQL input emas (auth’dan inject qilinadi)
+	// GraphQL input emas (auth’dan inject qilinadi) — @IsOptional so forbidNonWhitelisted skips it
+	@IsOptional()
 	memberId?: ObjectId;
 }

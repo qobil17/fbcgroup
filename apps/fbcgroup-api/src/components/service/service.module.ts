@@ -19,7 +19,7 @@ import { MemberModule } from '../member/member.module';
 		ViewModule,
 		MemberModule,
 	],
-	exports: [ServiceModule],
-	providers: [ServiceResolver, ServiceService, ViewModule],
+	exports: [ServiceService],
+	providers: [ServiceResolver, ServiceService],
 })
 export class ServiceModule {}

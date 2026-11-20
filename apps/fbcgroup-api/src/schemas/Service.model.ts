@@ -1,8 +1,14 @@
-import { Schema } from 'mongoose';
-import { ServiceArea, ServiceCollection, ServiceDetail, ServiceStatus, ServiceType } from '../libs/enums/service.enum';
+import { Schema, Types } from 'mongoose';
+import { ServiceArea, ServiceCollection, ServiceDetailAlif, ServiceDetailHpline, ServiceStatus, ServiceType } from '../libs/enums/service.enum';
 
 const ServiceSchema = new Schema(
 	{
+		memberId: {
+			type: Schema.Types.ObjectId,
+			ref: 'Member',
+			required: true,
+		},
+
 		serviceCollection: {
 			type: String,
 			enum: ServiceCollection,
@@ -30,7 +36,7 @@ const ServiceSchema = new Schema(
 
 		serviceDetail: {
 			type: String,
-			enum: ServiceDetail,
+			enum: [...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)],
 			required: true,
 		},
 
@@ -42,7 +48,6 @@ const ServiceSchema = new Schema(
 
 		servicePrice: {
 			type: Number,
-			required: true,
 			min: 0,
 		},
 

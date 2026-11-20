@@ -3,7 +3,13 @@ import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, Length, ArrayMinSize, Min, IsIn } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { OrderUpdate } from './order.update';
-import { ServiceArea, ServiceCollection, ServiceDetail, ServiceType } from '../../enums/service.enum';
+import {
+	ServiceArea,
+	ServiceCollection,
+	ServiceDetailAlif,
+	ServiceDetailHpline,
+	ServiceType,
+} from '../../enums/service.enum';
 import { availableMemberSorts } from '../../config';
 import { Direction } from '../../enums/common.enum';
 import { OrderStatus } from '../../enums/order.enum';
@@ -15,8 +21,9 @@ export class OrderInput {
 	serviceCollection: ServiceCollection;
 
 	@IsNotEmpty()
-	@Field(() => ServiceDetail)
-	serviceDetail: ServiceDetail;
+	@IsIn([...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)])
+	@Field(() => String)
+	serviceDetail: string;
 
 	@IsNotEmpty()
 	@Field(() => ServiceType)
@@ -31,12 +38,18 @@ export class OrderInput {
 	@Field(() => Int, { nullable: true })
 	estimatedSquare?: number;
 
+	@IsOptional()
+	@Min(1)
+	@Field(() => Int, { nullable: true })
+	estimatedPoints?: number; // ALIF uchun — lampochka/nuqta soni
+
 	@IsNotEmpty()
 	@Length(7, 20)
 	@Field(() => String)
 	phone: string;
 
-	// ❗ GraphQL input emas (AuthGuard’dan keladi)
+	// ❗ GraphQL input emas (AuthGuard’dan keladi) — @IsOptional so forbidNonWhitelisted skips it
+	@IsOptional()
 	memberId?: ObjectId;
 }
 

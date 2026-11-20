@@ -1,7 +1,8 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsIn, IsNotEmpty, IsOptional, Length, Min } from 'class-validator';
 import {
-	ServiceDetail as ServiceDetail,
+	ServiceDetailHpline,
+	ServiceDetailAlif,
 	ServiceArea,
 	ServiceCollection,
 	ServiceStatus,
@@ -31,16 +32,17 @@ export class ServiceInput {
 	serviceStatus?: ServiceStatus;
 
 	@IsNotEmpty()
-	@Field(() => ServiceDetail)
-	serviceDetail: ServiceDetail;
+	@IsIn([...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)])
+	@Field(() => String)
+	serviceDetail: string;
 
 	@IsNotEmpty()
 	@Field(() => ServiceArea)
 	serviceArea: ServiceArea;
 
-	@IsNotEmpty()
-	@Field(() => Number)
-	servicePrice: number;
+	@IsOptional()
+	@Field(() => Number, { nullable: true })
+	servicePrice?: number;
 
 	@IsOptional()
 	@Length(5, 10000)
@@ -51,8 +53,9 @@ export class ServiceInput {
 	@Field(() => [String])
 	serviceImages: string[];
 
-	// GraphQl input emas
-	memberId?: ObjectId; // injected from auth
+	// GraphQL input emas — injected from auth; @IsOptional so forbidNonWhitelisted skips it
+	@IsOptional()
+	memberId?: ObjectId;
 }
 
 @InputType()
@@ -75,8 +78,9 @@ export class SISearch {
 	serviceTitle?: string;
 
 	@IsOptional()
-	@Field(() => ServiceDetail, { nullable: true })
-	serviceDetail?: ServiceDetail;
+	@IsIn([...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)])
+	@Field(() => String, { nullable: true })
+	serviceDetail?: string;
 
 	@IsOptional()
 	@Field(() => ServiceArea, { nullable: true })

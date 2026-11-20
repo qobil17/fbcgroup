@@ -19,7 +19,6 @@ export class ServiceResolver {
 	@UseGuards(WithoutGuard)
 	@Query((returns) => Service)
 	public async getService(@Args('serviceId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Service> {
-		console.log('Query: getService');
 		const serviceId = shapeIntoMongoObjectId(input);
 		return await this.serviceService.getService(memberId, serviceId);
 	}
@@ -30,7 +29,6 @@ export class ServiceResolver {
 		@Args('input') input: ServicesInquiry,
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Services> {
-		console.log('Query: getServices');
 		return await this.serviceService.getServices(memberId, input);
 	}
 
@@ -42,7 +40,6 @@ export class ServiceResolver {
 		@Args('input') input: ServiceInput,
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Service> {
-		console.log('Mutation: createService');
 		input.memberId = memberId;
 		return await this.serviceService.createService(input);
 	}
@@ -51,7 +48,6 @@ export class ServiceResolver {
 	@UseGuards(RolesGuard)
 	@Roles(MemberType.ADMIN)
 	public async updateService(@Args('input') input: ServiceUpdate): Promise<Service> {
-		console.log('Mutation: updateService');
 		return this.serviceService.updateService(input);
 	}
 
@@ -62,15 +58,13 @@ export class ServiceResolver {
 		@Args('input') input: AllServicesInquiry,
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Services> {
-		console.log('Query: getAllServicesByAdmin');
 		return await this.serviceService.getAllServicesByAdmin(memberId, input);
 	}
 
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 	@Mutation((returns) => Service)
-	public async removeServiceByAdmin(@Args('serviceId') input: ServiceUpdate): Promise<Service> {
-		console.log('Mutation: removeServiceByAdmin');
+	public async removeServiceByAdmin(@Args('serviceId') input: string): Promise<Service> {
 		const serviceId = shapeIntoMongoObjectId(input);
 		return await this.serviceService.removeServiceByAdmin(serviceId);
 	}

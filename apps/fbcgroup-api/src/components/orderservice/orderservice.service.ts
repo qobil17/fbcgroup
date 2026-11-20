@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Search } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Order, Orders } from '../../libs/dto/orderService/order';
@@ -21,20 +21,19 @@ export class OrderServiceService {
 			});
 			return await order.save();
 		} catch (err) {
-			console.log('Error, Service.model:', err.message);
-			throw new BadRequestException(Message.CREATE_FAILED);
+				throw new BadRequestException(Message.CREATE_FAILED);
 		}
 	}
 
 	public async getOrder(memberId: ObjectId, orderId: ObjectId): Promise<Order> {
 		const search: T = {
 			_id: orderId,
+			memberId: memberId,
 			serviceCollection: {
 				$in: [ServiceCollection.HPLINE, ServiceCollection.ALIF],
 			},
 		};
 		const targetOrder: Order = await this.orderModel.findOne(search).lean().exec();
-		console.log(' targetOrder:', targetOrder);
 
 		if (!targetOrder) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		return targetOrder;
@@ -74,10 +73,6 @@ export class OrderServiceService {
 			memberId: memberId,
 		};
 
-		console.log('orderId type:', typeof orderId, orderId);
-		console.log('memberId:', memberId);
-		console.log('updateData:', updateData);
-
 		const result = await this.orderModel
 			.findOneAndUpdate(search, updateData, { new: true })
 
@@ -85,6 +80,15 @@ export class OrderServiceService {
 
 		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
 
+		return result;
+	}
+
+	public async updateOrderByAdmin(input: OrderUpdate): Promise<Order> {
+		const { orderId, ...updateData } = input;
+		const result = await this.orderModel
+			.findByIdAndUpdate(orderId, updateData, { new: true })
+			.exec();
+		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
 		return result;
 	}
 
@@ -123,7 +127,7 @@ export class OrderServiceService {
 
 				{
 					$facet: {
-						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: Math.min(input.limit, 100) }],
 						metaCounter: [{ $count: 'total' }],
 					},
 				},
@@ -134,6 +138,10 @@ export class OrderServiceService {
 			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		}
 
-		return result[0];
+		// $facet always returns result[0]; metaCounter is [{total:N}] (array) — normalize to object
+		return {
+			list: result[0].list,
+			metaCounter: result[0].metaCounter?.[0] ?? { total: 0 },
+		};
 	}
 }

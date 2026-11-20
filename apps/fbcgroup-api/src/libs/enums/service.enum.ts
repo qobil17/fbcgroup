@@ -9,18 +9,25 @@ registerEnumType(ServiceCollection, {
 	name: 'ServiceCollection',
 });
 
-export enum ServiceDetail {
+export enum ServiceDetailHpline {
 	HPL = 'HPL',
 	ALIKAFON = 'ALIKAFON',
 	GRANITE = 'GRANITE',
 	SERANIT = 'SERANIT',
+}
+
+registerEnumType(ServiceDetailHpline, {
+	name: 'ServiceDetailHpline',
+});
+
+export enum ServiceDetailAlif {
 	LED = 'LED',
 	DECORATIVE = 'DECORATIVE',
 	EMERGENCY_LIGHT = 'EMERGENCY_LIGHT',
 }
 
-registerEnumType(ServiceDetail, {
-	name: 'ServiceDetail',
+registerEnumType(ServiceDetailAlif, {
+	name: 'ServiceDetailAlif',
 });
 
 export enum ServiceType {

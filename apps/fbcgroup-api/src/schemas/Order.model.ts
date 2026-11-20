@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { OrderStatus } from '../libs/enums/order.enum';
-import { ServiceArea, ServiceCollection, ServiceDetail, ServiceType } from '../libs/enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceDetailAlif, ServiceDetailHpline, ServiceType } from '../libs/enums/service.enum';
 
 const OrderSchema = new Schema(
 	{
@@ -16,7 +16,7 @@ const OrderSchema = new Schema(
 		},
 		serviceDetail: {
 			type: String,
-			enum: ServiceDetail,
+			enum: [...Object.values(ServiceDetailHpline), ...Object.values(ServiceDetailAlif)],
 			required: true,
 		},
 		serviceType: {

@@ -2,7 +2,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { Member } from '../member/member';
 import { OrderStatus } from '../../enums/order.enum';
-import { ServiceArea, ServiceCollection, ServiceDetail, ServiceType } from '../../enums/service.enum';
+import { ServiceArea, ServiceCollection, ServiceType } from '../../enums/service.enum';
 import { IsNotEmpty } from 'class-validator';
 
 @ObjectType()
@@ -22,8 +22,8 @@ export class Order {
 	@Field(() => ServiceCollection)
 	serviceCollection: ServiceCollection;
 
-	@Field(() => ServiceDetail)
-	serviceDetail: ServiceDetail;
+	@Field(() => String)
+	serviceDetail: string;
 
 	@Field(() => ServiceType)
 	serviceType: ServiceType;
