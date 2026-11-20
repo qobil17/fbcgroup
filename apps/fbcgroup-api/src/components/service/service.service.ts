@@ -12,7 +12,6 @@ import { ViewService } from '../view/view.service';
 import { MemberService } from '../member/member.service';
 import { ServiceUpdate } from '../../libs/dto/service/service.update';
 import * as moment from 'moment';
-import { translateFromUzbek, TargetLang } from '../../libs/translate';
 import { MemberType } from '../../libs/enums/member.enum';
 
 @Injectable()
@@ -21,54 +20,11 @@ export class ServiceService {
 		@InjectModel('Service') private readonly serviceModel: Model<Service>,
 		private viewService: ViewService,
 	) {}
-	// Tarjima maydonlari: [maydon, manba (o'zbekcha), til]
-	private static readonly I18N: [string, 'serviceTitle' | 'serviceDesc', TargetLang][] = [
-		['serviceTitleRu', 'serviceTitle', 'ru'],
-		['serviceTitleEn', 'serviceTitle', 'en'],
-		['serviceDescRu', 'serviceDesc', 'ru'],
-		['serviceDescEn', 'serviceDesc', 'en'],
-	];
-
-	/**
-	 * Bo'sh RU/EN maydonlarni o'zbekchadan avtomatik tarjima qiladi.
-	 * Admin qo'lda yozgan tarjimaga tegilmaydi; avtomatik tarjima esa o'zbekcha matn o'zgarsa yangilanadi.
-	 */
-	private async autoTranslate(input: T, existing: T = {}): Promise<T> {
-		const auto = new Set<string>(existing.serviceAutoTranslated ?? []);
-		const patch: T = {};
-		const jobs: Promise<void>[] = [];
-		for (const [field, source, lang] of ServiceService.I18N) {
-			const provided = input[field];
-			const manual = typeof provided === 'string' && provided.trim() !== '' && provided.trim() !== (existing[field] ?? '').trim();
-			if (manual) {
-				auto.delete(field);
-				continue;
-			}
-			const sourceText = (input[source] ?? existing[source] ?? '').trim();
-			const current = (provided !== undefined ? provided : existing[field] ?? '').trim();
-			const sourceChanged = input[source] !== undefined && (input[source] ?? '').trim() !== (existing[source] ?? '').trim();
-			const needs = sourceText && (!current || (auto.has(field) && sourceChanged));
-			if (!needs) continue;
-			jobs.push(
-				translateFromUzbek(sourceText, lang).then((out) => {
-					if (out) {
-						patch[field] = out;
-						auto.add(field);
-					}
-				}),
-			);
-		}
-		await Promise.all(jobs);
-		patch.serviceAutoTranslated = [...auto];
-		return patch;
-	}
-
 	public async createService(input: ServiceInput): Promise<Service> {
-		const translated = await this.autoTranslate(input as T);
+		console.log('createService input:', JSON.stringify(input, null, 2));
 		try {
 			const result = await this.serviceModel.create({
 				...input,
-				...translated,
 				serviceStatus: input.serviceStatus ?? ServiceStatus.ACTIVE,
 			});
 
@@ -124,9 +80,7 @@ export class ServiceService {
 		// 	input.deletedAt = deletedAt;
 		// }
 
-		const existing = (await this.serviceModel.findOne(search).lean().exec()) as T | null;
-		const translated = existing ? await this.autoTranslate(input as T, existing) : {};
-		const result = await this.serviceModel.findOneAndUpdate(search, { ...input, ...translated }, { new: true }).exec();
+		const result = await this.serviceModel.findOneAndUpdate(search, input, { new: true }).exec();
 
 		if (!result) {
 			throw new InternalServerErrorException(Message.UPDATE_FAILED);

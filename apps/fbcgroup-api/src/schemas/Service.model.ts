@@ -60,8 +60,6 @@ const ServiceSchema = new Schema(
 		serviceTitleEn: { type: String, trim: true },
 		serviceDescRu: { type: String },
 		serviceDescEn: { type: String },
-		// qaysi tarjimalar avtomatik qilingan (o'zbekcha o'zgarsa qayta tarjima qilinadi; qo'lda yozilganiga tegilmaydi)
-		serviceAutoTranslated: { type: [String], default: [] },
 
 		serviceImages: {
 			type: [String],
