@@ -45,6 +45,7 @@ async function bootstrap() {
 	// Graceful shutdown
 	app.enableShutdownHooks();
 
-	await app.listen(process.env.PORT_API ?? 3000);
+	// Render/Railway portni PORT orqali beradi; lokalda PORT_API ishlatiladi
+	await app.listen(process.env.PORT ?? process.env.PORT_API ?? 3000);
 }
 bootstrap();
