@@ -44,30 +44,31 @@ export class ServiceInput {
 	@Field(() => Number, { nullable: true })
 	servicePrice?: number;
 
-	@IsOptional()
+	// Nom va tavsif uch tilda majburiy (o'zbek, rus, ingliz)
+	@IsNotEmpty({ message: "Tavsif (o'zbekcha) majburiy" })
 	@Length(5, 10000)
-	@Field(() => String, { nullable: true })
-	serviceDesc?: string;
+	@Field(() => String)
+	serviceDesc: string;
 
-	@IsOptional()
-	@Length(0, 200)
-	@Field(() => String, { nullable: true })
-	serviceTitleRu?: string;
+	@IsNotEmpty({ message: 'Nomi (ruscha) majburiy' })
+	@Length(3, 200)
+	@Field(() => String)
+	serviceTitleRu: string;
 
-	@IsOptional()
-	@Length(0, 200)
-	@Field(() => String, { nullable: true })
-	serviceTitleEn?: string;
+	@IsNotEmpty({ message: 'Nomi (inglizcha) majburiy' })
+	@Length(3, 200)
+	@Field(() => String)
+	serviceTitleEn: string;
 
-	@IsOptional()
-	@Length(0, 10000)
-	@Field(() => String, { nullable: true })
-	serviceDescRu?: string;
+	@IsNotEmpty({ message: 'Tavsif (ruscha) majburiy' })
+	@Length(5, 10000)
+	@Field(() => String)
+	serviceDescRu: string;
 
-	@IsOptional()
-	@Length(0, 10000)
-	@Field(() => String, { nullable: true })
-	serviceDescEn?: string;
+	@IsNotEmpty({ message: 'Tavsif (inglizcha) majburiy' })
+	@Length(5, 10000)
+	@Field(() => String)
+	serviceDescEn: string;
 
 	@IsNotEmpty()
 	@Field(() => [String])

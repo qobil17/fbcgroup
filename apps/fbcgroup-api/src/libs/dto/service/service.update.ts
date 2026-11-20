@@ -43,23 +43,24 @@ export class ServiceUpdate {
 	@Field(() => String, { nullable: true })
 	serviceDesc?: string;
 
+	// Tahrirlashda maydon yuborilsa, bo'sh bo'lishi mumkin emas
 	@IsOptional()
-	@Length(0, 200)
+	@Length(3, 200)
 	@Field(() => String, { nullable: true })
 	serviceTitleRu?: string;
 
 	@IsOptional()
-	@Length(0, 200)
+	@Length(3, 200)
 	@Field(() => String, { nullable: true })
 	serviceTitleEn?: string;
 
 	@IsOptional()
-	@Length(0, 10000)
+	@Length(5, 10000)
 	@Field(() => String, { nullable: true })
 	serviceDescRu?: string;
 
 	@IsOptional()
-	@Length(0, 10000)
+	@Length(5, 10000)
 	@Field(() => String, { nullable: true })
 	serviceDescEn?: string;
 
